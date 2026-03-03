@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Gabriel Alves - Fonoaudiologia Infantil</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Ícone para PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2C7A5A">
+</head>
+<body>
+    <div id="app"></div>
+
+    <!-- Input oculto para importar arquivo -->
+    <input type="file" id="importFile" accept=".json" style="display:none">
+
+    <!-- MODAIS -->
+    <div id="notificationModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 style="margin-bottom:15px;">🔔 Ativar Notificações</h3>
+            <p class="muted">Quer receber lembretes dos próximos atendimentos?</p>
+            <p class="muted" style="margin:10px 0;">Você será avisado 15 minutos antes de cada sessão.</p>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+                <button id="cancelNotification" class="small">Agora não</button>
+                <button id="enableNotifications" class="primary small">🔔 Ativar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="anamneseModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>📋 Anamnese</h3>
+            <div style="margin:15px 0;">
+                <label>Queixa principal</label>
+                <textarea id="aQueixa" rows="2"></textarea>
+            </div>
+            <div style="margin:15px 0;">
+                <label>Histórico</label>
+                <textarea id="aHistorico" rows="2"></textarea>
+            </div>
+            <div style="margin:15px 0;">
+                <label>Observações</label>
+                <textarea id="aObs" rows="3"></textarea>
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button id="closeAnamnese" class="small">Fechar</button>
+                <button id="saveAnamnese" class="primary small">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="tokenModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>🎫 Registrar Token Cassems</h3>
+            <p class="muted">Registre o token de autorização enviado pelo paciente</p>
+            
+            <div style="margin:15px 0;">
+                <label>Data da sessão</label>
+                <input type="date" id="tokenDate" readonly />
+            </div>
+            <div style="margin:15px 0;">
+                <label>Paciente</label>
+                <input type="text" id="tokenPatient" readonly />
+            </div>
+            <div style="margin:15px 0;">
+                <label>Token de autorização</label>
+                <input type="text" id="tokenCode" placeholder="Ex: CASS-123456" />
+            </div>
+            <div style="margin:15px 0;">
+                <label>Status do token</label>
+                <select id="tokenStatus">
+                    <option value="enviado">✅ Enviado</option>
+                    <option value="pendente">⏳ Pendente</option>
+                    <option value="problema">❌ Problema no token</option>
+                </select>
+            </div>
+            
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button id="cancelToken" class="small">Cancelar</button>
+                <button id="saveToken" class="primary small">Salvar Token</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: GESTÃO MANUAL DE TOKENS -->
+    <div id="manualTokenModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>🎫 Gerenciar Tokens Manuais</h3>
+            <p class="muted" id="manualTokenPatientName"></p>
+            
+            <div style="margin:20px 0;">
+                <label>Adicionar token manual</label>
+                <div class="grid2">
+                    <select id="manualTokenMonth">
+                        <option value="">Selecione o mês</option>
+                    </select>
+                    <button id="addManualToken" class="primary small" style="margin-top:20px;">➕ Adicionar Token</button>
+                </div>
+            </div>
+            
+            <hr>
+            
+            <div style="margin:15px 0;">
+                <label>Tokens registrados</label>
+                <div id="manualTokensList" class="list" style="max-height:300px; overflow-y:auto;"></div>
+            </div>
+            
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+                <button id="closeManualToken" class="small">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="evolucaoModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 style="margin-bottom:15px;">📝 Registrar Evolução</h3>
+            <div style="margin:15px 0;">
+                <label>Data</label>
+                <input type="date" id="evolucaoData" />
+            </div>
+            <div style="margin:15px 0;">
+                <label>Evolução do paciente</label>
+                <textarea id="evolucaoTexto" rows="5" placeholder="Descreva a evolução..."></textarea>
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button id="cancelEvolucao" class="small">Cancelar</button>
+                <button id="saveEvolucao" class="primary small">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editEvolucaoModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 style="margin-bottom:15px;">✏️ Editar Evolução</h3>
+            <div style="margin:15px 0;">
+                <label>Data</label>
+                <input type="date" id="editEvolucaoData" />
+            </div>
+            <div style="margin:15px 0;">
+                <label>Evolução do paciente</label>
+                <textarea id="editEvolucaoTexto" rows="5" placeholder="Descreva a evolução..."></textarea>
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button id="cancelEditEvolucao" class="small">Cancelar</button>
+                <button id="saveEditEvolucao" class="primary small">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Modules -->
+    <script src="assets/js/core/config.js"></script>
+    <script src="assets/js/core/utils.js"></script>
+    <script src="assets/js/core/storage.js"></script>
+    <script src="assets/js/core/notifications.js"></script>
+    
+    <script src="assets/js/models/patients.js"></script>
+    <script src="assets/js/models/sessions.js"></script>
+    <script src="assets/js/models/schedule.js"></script>
+    <script src="assets/js/models/tokens.js"></script>
+    <script src="assets/js/models/evolucoes.js"></script>
+    
+    <script src="assets/js/views/components.js"></script>
+    <script src="assets/js/views/dashboard.js"></script>
+    <script src="assets/js/views/daily.js"></script>
+    <script src="assets/js/views/patients.js"></script>
+    <script src="assets/js/views/schedule.js"></script>
+    <script src="assets/js/views/reports.js"></script>
+    <script src="assets/js/views/modals.js"></script>
+    
+    <script src="assets/js/controllers/session-actions.js"></script>
+    <script src="assets/js/controllers/patient-actions.js"></script>
+    <script src="assets/js/controllers/schedule-actions.js"></script>
+    <script src="assets/js/controllers/token-actions.js"></script>
+    <script src="assets/js/controllers/evolucao-actions.js"></script>
+    
+    <script src="assets/js/ui/tabs.js"></script>
+    <script src="assets/js/ui/shortcuts.js"></script>
+    <script src="assets/js/ui/theme.js"></script>
+    <script src="assets/js/ui/pwa.js"></script>
+    
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
